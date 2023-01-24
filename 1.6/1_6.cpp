@@ -27,17 +27,15 @@ int main (int argc, char* args[])
     SDL_Rect r = { 40, 10, 10,10 };
     SDL_Rect s = { 40, 40, 10,10 };
     SDL_Rect t = { 40, 70, 10,10 };
-    SDL_Rect l = { 180, 0, 1, 100 };
-    SDL_Rect texto = { 60,50, 120,20 };
-    SDL_Color color = { 255, 255, 0 };
+    SDL_Rect texto = { 10,50, 160,20 };
     char podio[3];
     int ordemPodio = 0;
     int goR = 1;
     int goS = 1;
     int goT = 1;
     int espera = 500;
-//    bool quit = false;
-    while (1) {
+    bool quit = false;
+    while (!quit) {
         SDL_SetRenderDrawColor(ren, 0xFF,0xFF,0xFF,0x00);
         SDL_RenderClear(ren);
         SDL_RenderCopy(ren, txt, NULL, &texto);
@@ -45,7 +43,7 @@ int main (int argc, char* args[])
         SDL_RenderFillRect(ren, &r);
         SDL_RenderFillRect(ren, &s);
         SDL_RenderFillRect(ren, &t);
-        SDL_RenderFillRect(ren, &l);
+        SDL_RenderDrawLine(ren, 180, 0, 180, 100);
         SDL_RenderPresent(ren);
 
         SDL_Event evt;
@@ -64,8 +62,8 @@ int main (int argc, char* args[])
                     case SDLK_RIGHT:
                         s.x += 2;
                         break;
-//                    case SDLK_ESCAPE:
-//                        quit = true;
+                    case SDLK_ESCAPE:
+                        quit = true;
                 }
             } else if (evt.type == SDL_MOUSEMOTION && goT){
                 t.x = evt.motion.x;
@@ -75,21 +73,21 @@ int main (int argc, char* args[])
             if (goR) {
                 r.x += 2;
             }
-            if (SDL_HasIntersection(&r, &l)) {
-                goR = 0;
-                podio[ordemPodio] = 'r';
-                ordemPodio++;
-            }
-            if (SDL_HasIntersection(&s, &l)) {
-                goS = 0;
-                podio[ordemPodio] = 's';
-                ordemPodio++;
-            }
-            if (SDL_HasIntersection(&t, &l)) {
-                goT = 0;
-                podio[ordemPodio] = 't';
-                ordemPodio++;
-            }
+        }
+        if (r.x + 10 > 180) {
+            goR = 0;
+            podio[ordemPodio] = 'r';
+            ordemPodio++;
+        }
+        if (s.x + 10 > 180) {
+            goS = 0;
+            podio[ordemPodio] = 's';
+            ordemPodio++;
+        }
+        if (t.x + 10 > 180) {
+            goT = 0;
+            podio[ordemPodio] = 't';
+            ordemPodio++;
         }
         if (goR == 0 && goS == 0 && goT == 0){
             if (podio[0] == 'r'){
