@@ -1,9 +1,13 @@
+#include <iostream>
+#include <assert.h>
 #include <SDL2/SDL.h>
+#include <SDL2/SDL_ttf.h>
 
 int main (int argc, char* args[])
 {
     /* INICIALIZACAO */
     SDL_Init(SDL_INIT_EVERYTHING);
+    TTF_Init();
     SDL_Window* win = SDL_CreateWindow("Movendo um Retângulo",
                          SDL_WINDOWPOS_UNDEFINED,
                          SDL_WINDOWPOS_UNDEFINED,
@@ -11,14 +15,21 @@ int main (int argc, char* args[])
                       );
     SDL_Renderer* ren = SDL_CreateRenderer(win, -1, 0);
 
+    TTF_Font* fnt = TTF_OpenFont("tiny.ttf", 20);
+    assert(fnt != NULL);
+    SDL_Color clr = {0xFF,0x00,0x00,0xFF};
+    SDL_Surface* sfc = TTF_RenderText_Blended(fnt, " ", clr);
+    assert(sfc != NULL);
+    SDL_Texture* txt = SDL_CreateTextureFromSurface(ren, sfc);
+    assert(txt != NULL);
+
     /* EXECUÇÃO */
     SDL_Rect r = { 100, 20, 30,30 };
+    SDL_Rect texto = { 10,10, 60,15 };
     SDL_Event evt;
     bool quit = false;
     SDL_Point clickOffset;
     SDL_Rect * selectedRect = NULL;
-    bool leftMouseButtonDown = false;
-    bool escape = false;
     int xOriginal, yOriginal;
 
     SDL_Point mousePos;
@@ -27,36 +38,42 @@ int main (int argc, char* args[])
         SDL_PollEvent(&evt);
         SDL_SetRenderDrawColor(ren, 0xFF,0xFF,0xFF,0x00);
         SDL_RenderClear(ren);
+        SDL_RenderCopy(ren, txt, NULL, &texto);
         SDL_SetRenderDrawColor(ren, 0x00,0x00,0xFF,0x00);
         SDL_RenderFillRect(ren, &r);
         SDL_RenderPresent(ren);
 
         switch (evt.type) {
             case SDL_KEYDOWN:
-                if (SDLK_ESCAPE){
-                    escape = true;
-                    leftMouseButtonDown = false;
+                if (evt.key.keysym.sym == SDLK_ESCAPE) {
                     selectedRect = NULL;
+                    sfc = TTF_RenderText_Blended(fnt, "Parado", clr);
+                    txt = SDL_CreateTextureFromSurface(ren, sfc);
+                    SDL_RenderCopy(ren, txt, NULL, &texto);
                     r.x = xOriginal;
                     r.y = yOriginal;
                 }
                 break;
             case SDL_MOUSEBUTTONUP:
-                if (leftMouseButtonDown && evt.button.button == SDL_BUTTON_LEFT)
+                if (evt.button.button == SDL_BUTTON_LEFT)
                 {
-                    leftMouseButtonDown = false;
+                    sfc = TTF_RenderText_Blended(fnt, "Parado", clr);
+                    txt = SDL_CreateTextureFromSurface(ren, sfc);
+                    SDL_RenderCopy(ren, txt, NULL, &texto);
                     selectedRect = NULL;
                 }
                 break;
             case SDL_MOUSEBUTTONDOWN:
-                if (!leftMouseButtonDown && evt.button.button == SDL_BUTTON_LEFT)
+                if (evt.button.button == SDL_BUTTON_LEFT)
                 {
-                    leftMouseButtonDown = true;
                     xOriginal = r.x;
                     yOriginal = r.y;
                     if (SDL_PointInRect(&mousePos, &r))
                     {
                         selectedRect = &r;
+                        sfc = TTF_RenderText_Blended(fnt, "Clicado", clr);
+                        txt = SDL_CreateTextureFromSurface(ren, sfc);
+                        SDL_RenderCopy(ren, txt, NULL, &texto);
                         clickOffset.x = mousePos.x - r.x;
                         clickOffset.y = mousePos.y - r.y;
                         break;
@@ -65,14 +82,11 @@ int main (int argc, char* args[])
                 break;
             case SDL_MOUSEMOTION:
                 mousePos = { evt.motion.x, evt.motion.y };
-//                if (escape){
-//                    leftMouseButtonDown = false;
-//                    selectedRect->x = xOriginal;
-//                    selectedRect->y = yOriginal;
-//                    escape = false;
-//                }
-                if (leftMouseButtonDown && selectedRect != NULL)
+                if (selectedRect != NULL)
                 {
+                    sfc = TTF_RenderText_Blended(fnt, "Movendo", clr);
+                    txt = SDL_CreateTextureFromSurface(ren, sfc);
+                    SDL_RenderCopy(ren, txt, NULL, &texto);
                     selectedRect->y = mousePos.y - clickOffset.y;
                     selectedRect->x = mousePos.x - clickOffset.x;
                 }
