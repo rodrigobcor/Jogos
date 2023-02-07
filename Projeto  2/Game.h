@@ -38,6 +38,8 @@ private:
 	SDL_Texture* groundTexture = nullptr;
 	SDL_Texture* boxTexture = nullptr;
 	SDL_Texture* goalTexture = nullptr;
+	TTF_Font* font = nullptr;
+	SDL_Color fontColor = { 0, 0, 0 };
 
 	class LevelManager* levelManager;
 	class Player* player;
