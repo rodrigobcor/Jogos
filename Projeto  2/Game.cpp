@@ -13,6 +13,11 @@ bool Game::Init() {
 		return false;
 	}
 
+	if (TTF_Init() != 0) {
+		cout << "SDL_TTF failed to initialize: " << IMG_GetError() << endl;
+		return false;
+	}
+
 	window = SDL_CreateWindow("PROJETO", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, SCREEN_WIDTH, SCREEN_HEIGHT, 0);
 	if (!window) {
 		cout << "Window failed to initialize: " << SDL_GetError() << endl;
@@ -32,6 +37,8 @@ bool Game::Init() {
 	groundTexture = LoadTexture("Assets/ground.png");
 	boxTexture = LoadTexture("Assets/box.png");
 	goalTexture = LoadTexture("Assets/goal.png");
+
+	font = TTF_OpenFont("Assets/lazy.ttf", 50);
 
 	player = new Player(this);
 
@@ -119,6 +126,8 @@ void Game::Draw() {
 		SDL_RenderCopy(renderer, boxTexture, NULL, boxes[i]->GetRect());
 	}
 
+	levelManager->showText(renderer, font, fontColor);
+
 	player->Draw(renderer);
 
 	SDL_RenderPresent(renderer);
@@ -134,6 +143,7 @@ void Game::Shutdown() {
 	SDL_DestroyWindow(window);
 
 	IMG_Quit();
+	TTF_Quit();
 	SDL_Quit();
 }
 
@@ -239,7 +249,7 @@ void Game::InitLevel(){
 
 void Game::GoToNextLevel() {
 	DestroyBoxes();
-
+	
 	levelManager->UpdateLevel();
 	levelManager->LoadLevel();
 
